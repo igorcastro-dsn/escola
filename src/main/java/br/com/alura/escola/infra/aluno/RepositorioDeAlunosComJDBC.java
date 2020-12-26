@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,19 +29,26 @@ public class RepositorioDeAlunosComJDBC implements RepositorioDeAlunos {
 	
 	@Override
 	public void matricular(Aluno aluno) {
-		String sql = "INSERT INTO aluno VALUES(?, ?, ?)";
+		String sql = "INSERT INTO aluno(cpf, nome, email) VALUES(?, ?, ?)";
 		try {
-			PreparedStatement ps = connection.prepareStatement(sql);
+			PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			ps.setString(1, aluno.getCpf());
 			ps.setString(2, aluno.getNome());
 			ps.setString(3, aluno.getEmail());
 			ps.execute();
+
+			ResultSet generatedKeys = ps.getGeneratedKeys();
+			if (!generatedKeys.next()) {
+				throw new IllegalArgumentException("Não foi possível identificar o id gerado");
+			}
 			
-			sql = "INSERT INTO telefone VALUES(?, ?)";
+			long id = generatedKeys.getLong(1);
+			sql = "INSERT INTO telefone(ddd, numero, aluno_id) VALUES(?, ?, ?)";
 			ps = connection.prepareStatement(sql);
 			for (Telefone telefone: aluno.getTelefones()) {
 				ps.setString(1, telefone.getDDD());
 				ps.setString(2, telefone.getNumero());
+				ps.setLong(3, id);
 				ps.execute();
 			}
 		} catch (SQLException e) {

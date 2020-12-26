@@ -7,7 +7,7 @@ public class EnvioDeEmailDeIndicacaoComJavaMail implements EnvioDeEmailDaIndicac
 
 	@Override
 	public void enviarPara(Aluno indicado) {
-		// lógica de envio de e-mail
+		// TODO: lógica de envio de e-mail
 	}
 
 }
